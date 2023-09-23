@@ -23,14 +23,16 @@ async def login_access_token(
 ):
     """OAuth2 compatible token, get an access token for future requests using username and password"""
 
-    result = await session.execute(select(User).where(User.email == form_data.username))
+    result = await session.execute(
+        select(User).where(User.username == form_data.username)
+    )
     user = result.scalars().first()
 
     if user is None:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     if not security.verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     return security.generate_access_token_response(str(user.id))
 

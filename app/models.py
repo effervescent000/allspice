@@ -30,7 +30,7 @@ class User(Base):
     id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), primary_key=True, default=lambda _: str(uuid.uuid4())
     )
-    email: Mapped[str] = mapped_column(
+    username: Mapped[str] = mapped_column(
         String(254), nullable=False, unique=True, index=True
     )
     hashed_password: Mapped[str] = mapped_column(String(128), nullable=False)

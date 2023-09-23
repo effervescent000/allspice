@@ -18,13 +18,13 @@ async def main() -> None:
     print("Start initial data")
     async with async_session() as session:
         result = await session.execute(
-            select(User).where(User.email == config.settings.FIRST_SUPERUSER_EMAIL)
+            select(User).where(User.username == config.settings.FIRST_SUPERUSER_EMAIL)
         )
         user = result.scalars().first()
 
         if user is None:
             new_superuser = User(
-                email=config.settings.FIRST_SUPERUSER_EMAIL,
+                username=config.settings.FIRST_SUPERUSER_EMAIL,
                 hashed_password=security.get_password_hash(
                     config.settings.FIRST_SUPERUSER_PASSWORD
                 ),

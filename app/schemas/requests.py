@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class BaseRequest(BaseModel):
@@ -15,5 +15,5 @@ class UserUpdatePasswordRequest(BaseRequest):
 
 
 class UserCreateRequest(BaseRequest):
-    email: EmailStr
+    username: str
     password: str

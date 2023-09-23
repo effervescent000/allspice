@@ -18,7 +18,7 @@ async def test_read_current_user(client: AsyncClient, default_user_headers):
     assert response.status_code == 200
     assert response.json() == {
         "id": default_user_id,
-        "email": default_user_email,
+        "username": default_user_email,
     }
 
 
@@ -56,11 +56,13 @@ async def test_register_new_user(
         app.url_path_for("register_new_user"),
         headers=default_user_headers,
         json={
-            "email": "qwe@example.com",
+            "username": "qwe@example.com",
             "password": "asdasdasd",
         },
     )
     assert response.status_code == 200
-    result = await session.execute(select(User).where(User.email == "qwe@example.com"))
+    result = await session.execute(
+        select(User).where(User.username == "qwe@example.com")
+    )
     user = result.scalars().first()
     assert user is not None

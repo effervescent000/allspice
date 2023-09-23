@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseResponse(BaseModel):
@@ -17,4 +17,4 @@ class AccessTokenResponse(BaseResponse):
 
 class UserResponse(BaseResponse):
     id: str
-    email: EmailStr
+    username: str

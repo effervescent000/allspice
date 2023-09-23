@@ -48,11 +48,13 @@ async def register_new_user(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Create new user"""
-    result = await session.execute(select(User).where(User.email == new_user.email))
+    result = await session.execute(
+        select(User).where(User.username == new_user.username)
+    )
     if result.scalars().first() is not None:
-        raise HTTPException(status_code=400, detail="Cannot use this email address")
+        raise HTTPException(status_code=400, detail="Cannot use this username address")
     user = User(
-        email=new_user.email,
+        username=new_user.username,
         hashed_password=get_password_hash(new_user.password),
     )
     session.add(user)

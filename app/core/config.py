@@ -26,7 +26,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, computed_field
+from pydantic import AnyHttpUrl, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_DIR = Path(__file__).parent.parent.parent
@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     TEST_DATABASE_DB: str = "postgres"
 
     # FIRST SUPERUSER
-    FIRST_SUPERUSER_EMAIL: EmailStr
+    FIRST_SUPERUSER_EMAIL: str
     FIRST_SUPERUSER_PASSWORD: str
 
     @computed_field
