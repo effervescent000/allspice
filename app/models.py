@@ -19,9 +19,16 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from app.utils.utils import get_now_int
+
 
 class Base(DeclarativeBase):
     pass
+
+
+class AuditTimestamps:
+    created_at: Mapped[int] = mapped_column(default=get_now_int)
+    updated_at: Mapped[int] = mapped_column(default=get_now_int, onupdate=get_now_int)
 
 
 class User(Base):
