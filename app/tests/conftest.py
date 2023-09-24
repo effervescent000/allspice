@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import config, security
 from app.core.session import async_engine, async_session
 from app.main import app
-from app.models import Base, User
+from app.models import Base, Language, User
 
 default_user_id = "b75365d9-7bf9-4f54-add5-aeab333a087b"
 default_user_email = "geralt@wiedzmin.pl"
@@ -19,6 +19,7 @@ default_user_password_hash = security.get_password_hash(default_user_password)
 default_user_access_token = security.create_jwt_token(
     str(default_user_id), 60 * 60 * 24, refresh=False
 )[0]
+default_language_name = "test language"
 
 
 @pytest.fixture(scope="session")
@@ -81,3 +82,23 @@ async def default_user(test_db_setup_sessionmaker) -> User:
 @pytest.fixture
 def default_user_headers(default_user: User):
     return {"Authorization": f"Bearer {default_user_access_token}"}
+
+
+@pytest_asyncio.fixture
+async def default_language(test_db_setup_sessionmaker) -> Language:
+    async with async_session() as session:
+        result = await session.execute(
+            select(Language).where(Language.name == default_language_name)
+        )
+        language = result.scalars().first()
+        if language is None:
+            new_language = Language(
+                name=default_language_name,
+                description="test description",
+                user_id=default_user_id,
+            )
+            session.add(new_language)
+            await session.commit()
+            await session.refresh(new_language)
+            return new_language
+        return language

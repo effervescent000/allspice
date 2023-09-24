@@ -16,3 +16,13 @@ async def test_upsert_language(client: AsyncClient, default_user_headers):
     language = response.json()
     assert language["name"] == LANGUAGE_NAME
     assert language["description"] == LANGUAGE_DESCRIPTION
+
+
+async def test_get_all_languages(
+    client: AsyncClient, default_user_headers, default_language
+):
+    response = await client.get(
+        app.url_path_for("get_all_languages"), headers=default_user_headers
+    )
+    languages = response.json()
+    assert languages[0]["name"] == default_language.name

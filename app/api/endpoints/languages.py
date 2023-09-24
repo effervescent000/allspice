@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
@@ -22,3 +23,15 @@ async def upsert_language(
     session.add(language)
     await session.commit()
     return language
+
+
+@router.get("/", response_model=list[LanguageResponse])
+async def get_all_languages(
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    result = await session.execute(
+        select(Language).where(Language.user_id == current_user.id)
+    )
+    langs = result.scalars().all()
+    return langs
