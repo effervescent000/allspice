@@ -18,3 +18,9 @@ class AccessTokenResponse(BaseResponse):
 class UserResponse(BaseResponse):
     id: str
     username: str
+
+
+class LanguageResponse(BaseResponse):
+    id: int
+    name: str
+    description: str | None

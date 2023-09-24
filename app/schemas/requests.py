@@ -17,3 +17,8 @@ class UserUpdatePasswordRequest(BaseRequest):
 class UserCreateRequest(BaseRequest):
     username: str
     password: str
+
+
+class LanguageRequest(BaseRequest):
+    name: str
+    description: str | None

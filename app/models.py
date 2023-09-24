@@ -15,9 +15,9 @@ alembic upgrade head
 """
 import uuid
 
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -34,3 +34,21 @@ class User(Base):
         String(254), nullable=False, unique=True, index=True
     )
     hashed_password: Mapped[str] = mapped_column(String(128), nullable=False)
+
+    languages: Mapped[list["Language"]] = relationship(
+        back_populates="user", cascade="delete, delete-orphan"
+    )
+
+
+class Language(Base):
+    __tablename__ = "language_model"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    description: Mapped[str | None]
+
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user_model.id", ondelete="CASCADE")
+    )
+
+    user: Mapped["User"] = relationship(back_populates="languages")

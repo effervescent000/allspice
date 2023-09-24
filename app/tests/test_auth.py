@@ -36,7 +36,7 @@ async def test_auth_access_token_fail_no_user(client: AsyncClient):
     )
 
     assert response.status_code == 400
-    assert response.json() == {"detail": "Incorrect email or password"}
+    assert response.json() == {"detail": "Incorrect username or password"}
 
 
 async def test_auth_refresh_token(client: AsyncClient, default_user: User):
