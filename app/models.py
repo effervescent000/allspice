@@ -31,7 +31,7 @@ class AuditTimestamps:
     updated_at: Mapped[int] = mapped_column(default=get_now_int, onupdate=get_now_int)
 
 
-class User(Base):
+class User(AuditTimestamps, Base):
     __tablename__ = "user_model"
 
     id: Mapped[str] = mapped_column(
@@ -47,7 +47,7 @@ class User(Base):
     )
 
 
-class Language(Base):
+class Language(AuditTimestamps, Base):
     __tablename__ = "language_model"
 
     id: Mapped[int] = mapped_column(primary_key=True)
