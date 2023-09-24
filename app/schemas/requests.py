@@ -20,5 +20,6 @@ class UserCreateRequest(BaseRequest):
 
 
 class LanguageRequest(BaseRequest):
+    id: int | None = None
     name: str
-    description: str | None
+    description: str | None = None
