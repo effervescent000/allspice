@@ -24,3 +24,10 @@ class LanguageResponse(BaseResponse):
     id: int
     name: str
     description: str | None
+
+
+class WordLinkResponse(BaseResponse):
+    id: int
+    definition: str
+    hint: str | None
+    part_of_speech: str

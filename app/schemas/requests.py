@@ -23,3 +23,10 @@ class LanguageRequest(BaseRequest):
     id: int | None = None
     name: str
     description: str | None = None
+
+
+class WordLinkRequest(BaseRequest):
+    id: int | None = None
+    definition: str
+    hint: str | None = None
+    part_of_speech: str
