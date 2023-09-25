@@ -27,3 +27,13 @@ async def test_get_word_links(
     word_links = response.json()
     assert len(word_links) == 1
     assert word_links == [word_link_factory(id=1, definition="test")]
+
+
+async def test_delete_word_link(
+    client: AsyncClient, default_user_headers, default_word_link
+):
+    response = await client.delete(
+        app.url_path_for("delete_word_link", word_link_id=1),
+        headers=default_user_headers,
+    )
+    assert response.status_code == 204

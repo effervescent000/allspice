@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
@@ -30,3 +30,13 @@ async def get_word_links(
     result = await session.execute(select(WordLink))
     word_links = result.scalars().all()
     return word_links
+
+
+@router.delete("/{word_link_id}", status_code=204)
+async def delete_word_link(
+    word_link_id: int,
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    await session.execute(delete(WordLink).where(WordLink.id == word_link_id))
+    await session.commit()
