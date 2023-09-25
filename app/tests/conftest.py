@@ -10,7 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import config, security
 from app.core.session import async_engine, async_session
 from app.main import app
-from app.models import Base, Language, User
+from app.models import Base, Language, User, WordLink
+from app.tests.shapes import word_link_factory
 
 default_user_id = "b75365d9-7bf9-4f54-add5-aeab333a087b"
 default_user_email = "geralt@wiedzmin.pl"
@@ -20,6 +21,7 @@ default_user_access_token = security.create_jwt_token(
     str(default_user_id), 60 * 60 * 24, refresh=False
 )[0]
 default_language_name = "test language"
+default_word_link_def = "test"
 
 
 @pytest.fixture(scope="session")
@@ -102,3 +104,21 @@ async def default_language(test_db_setup_sessionmaker) -> Language:
             await session.refresh(new_language)
             return new_language
         return language
+
+
+@pytest_asyncio.fixture
+async def default_word_link(test_db_setup_sessionmaker) -> WordLink:
+    async with async_session() as session:
+        result = await session.execute(
+            select(WordLink).where(WordLink.definition == default_word_link_def)
+        )
+        word_link = result.scalars().first()
+        if word_link is None:
+            new_word_link = WordLink(
+                **word_link_factory(definition=default_word_link_def)
+            )
+            session.add(new_word_link)
+            await session.commit()
+            await session.refresh(new_word_link)
+            return new_word_link
+    return word_link
