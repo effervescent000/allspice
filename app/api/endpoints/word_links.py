@@ -27,7 +27,7 @@ async def get_word_links(
     current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
-    result = await session.execute(select(WordLink))
+    result = await session.execute(select(WordLink).order_by(WordLink.definition))
     word_links = result.scalars().all()
     return word_links
 
