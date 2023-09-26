@@ -23,6 +23,7 @@ default_user_access_token = security.create_jwt_token(
 default_language_name = "test language"
 secondary_language_name = "second language"
 default_word_link_def = "test"
+secondary_word_link_def = "new"
 default_word_name = "teeeeeeeest"
 secondary_word_name = "new word"
 
@@ -139,6 +140,24 @@ async def default_word_link(test_db_setup_sessionmaker) -> WordLink:
         if word_link is None:
             new_word_link = WordLink(
                 **word_link_factory(definition=default_word_link_def)
+            )
+            session.add(new_word_link)
+            await session.commit()
+            await session.refresh(new_word_link)
+            return new_word_link
+    return word_link
+
+
+@pytest_asyncio.fixture
+async def secondary_word_link(test_db_setup_sessionmaker) -> WordLink:
+    async with async_session() as session:
+        result = await session.execute(
+            select(WordLink).where(WordLink.definition == secondary_word_link_def)
+        )
+        word_link = result.scalars().first()
+        if word_link is None:
+            new_word_link = WordLink(
+                **word_link_factory(definition=secondary_word_link_def)
             )
             session.add(new_word_link)
             await session.commit()

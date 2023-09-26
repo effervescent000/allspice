@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
-from app.models import Language, User, Word
+from app.models import Language, User, Word, WordLink
 from app.schemas.requests import WordRequest
 from app.schemas.responses import WordResponse
 
@@ -32,5 +32,37 @@ async def upsert_words(
     current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
-    ...
-    # first, validate that the language in question belongs to the user
+    # first, verify that the user upserting owns the language in question
+    language_ids = {word.language_id for word in words}
+    if len(language_ids) > 1:
+        raise HTTPException(status_code=400, detail="Too many languages")
+
+    language_result = await session.execute(
+        select(Language).where(Language.id.in_(language_ids))
+    )
+    language = language_result.scalars().first()
+    if language.user_id != current_user.id:
+        raise HTTPException(status_code=401)
+
+    # now upsert
+    output = []
+    for word in words:
+        new_word_links = (
+            (
+                await session.execute(
+                    select(WordLink).where(WordLink.id.in_(word.word_link_ids))
+                )
+            )
+            .unique()
+            .scalars()
+            .all()
+        )
+        word_to_upsert = Word(**word.model_dump(exclude=["word_link_ids"]))
+
+        word_to_upsert.word_links = new_word_links
+        word_to_upsert = await session.merge(word_to_upsert)
+
+        await session.commit()
+
+        output.append(word_to_upsert)
+    return output

@@ -1,6 +1,18 @@
 from typing import Any
 
 
+def prune_fields(
+    *, data: list[dict[str, Any]], fields: list[str], nest: list[str] = []
+):
+    for x in data:
+        for field in fields:
+            x.pop(field)
+        for field in nest:
+            if x.get(field):
+                x[field] = prune_fields(data=x[field], fields=["id"])
+    return data
+
+
 def word_link_factory(
     id: int = None,
     *,
@@ -43,7 +55,7 @@ def word_request_factory(
         **base_word_factory(
             id=id, word=word, part_of_speech=part_of_speech, language_id=language_id
         ),
-        "word_links": word_links,
+        "word_link_ids": word_links,
     }
 
 
