@@ -38,4 +38,6 @@ class WordResponse(BaseResponse):
     word: str
     part_of_speech: str
 
+    word_links: list[WordLinkResponse]
+
     language_id: int

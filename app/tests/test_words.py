@@ -2,7 +2,7 @@ from httpx import AsyncClient
 
 from app.main import app
 from app.models import Language, Word
-from app.tests.shapes import word_factory
+from app.tests.shapes import word_factory, word_link_factory
 
 
 async def test_get_words(
@@ -18,4 +18,10 @@ async def test_get_words(
     )
     words = response.json()
     assert len(words) == 1
-    assert words == [word_factory(id=default_word.id, language_id=default_language.id)]
+    assert words == [
+        word_factory(
+            id=default_word.id,
+            language_id=default_language.id,
+            word_links=[word_link_factory(id=1)],
+        )
+    ]

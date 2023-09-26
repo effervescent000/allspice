@@ -1,3 +1,6 @@
+from typing import Any
+
+
 def word_link_factory(
     id: int = None,
     *,
@@ -18,11 +21,13 @@ def word_factory(
     *,
     word: str = None,
     part_of_speech: str = None,
-    language_id: int = None
+    language_id: int = None,
+    word_links: list[dict[str, Any]] = None
 ):
     return {
         "id": id,
         "word": word or "teeeeeeeest",
         "part_of_speech": part_of_speech or "noun",
         "language_id": language_id or 1,
+        "word_links": word_links or [],
     }

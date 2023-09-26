@@ -21,5 +21,5 @@ async def get_all_words(
         .where(Language.user_id == current_user.id)
         .join(Language)
     )
-    words = result.scalars().all()
+    words = result.unique().scalars().all()
     return words

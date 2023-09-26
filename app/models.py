@@ -108,5 +108,5 @@ class Word(AuditTimestamps, LanguageRelated, Base):
     notes: Mapped[str | None]
 
     word_links: Mapped[list["WordLink"]] = relationship(
-        secondary=word_link_to_word, back_populates="words"
+        secondary=word_link_to_word, back_populates="words", lazy="joined"
     )
