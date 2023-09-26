@@ -37,5 +37,6 @@ class WordRequest(BaseRequest):
     word: str
     part_of_speech: str
     notes: str | None = None
+    language_id: int
 
     word_link_ids: list[int] = []

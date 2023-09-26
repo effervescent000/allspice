@@ -11,7 +11,7 @@ from app.core import config, security
 from app.core.session import async_engine, async_session
 from app.main import app
 from app.models import Base, Language, User, Word, WordLink
-from app.tests.shapes import word_factory, word_link_factory
+from app.tests.shapes import base_word_factory, word_link_factory
 
 default_user_id = "b75365d9-7bf9-4f54-add5-aeab333a087b"
 default_user_email = "geralt@wiedzmin.pl"
@@ -158,7 +158,7 @@ async def default_word(
         word_def = result.scalars().first()
         if word_def is None:
             new_word = Word(
-                **word_factory(
+                **base_word_factory(
                     word=default_word_name,
                     language_id=default_language.id,
                 )
@@ -182,7 +182,7 @@ async def second_word(
         word_def = result.scalars().first()
         if word_def is None:
             new_word = Word(
-                **word_factory(
+                **base_word_factory(
                     word=secondary_word_name,
                     language_id=second_language.id,
                 )

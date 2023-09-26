@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
 from app.models import Language, User, Word
+from app.schemas.requests import WordRequest
 from app.schemas.responses import WordResponse
 
 router = APIRouter()
@@ -23,3 +24,13 @@ async def get_all_words(
     )
     words = result.unique().scalars().all()
     return words
+
+
+@router.post("/", response_model=list[WordResponse])
+async def upsert_words(
+    words: list[WordRequest],
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    ...
+    # first, validate that the language in question belongs to the user

@@ -6,7 +6,7 @@ def word_link_factory(
     *,
     definition: str = None,
     hint: str = None,
-    part_of_speech: str = None
+    part_of_speech: str = None,
 ):
     return {
         "id": id,
@@ -16,18 +16,48 @@ def word_link_factory(
     }
 
 
-def word_factory(
+def base_word_factory(
     id: int = None,
     *,
     word: str = None,
     part_of_speech: str = None,
     language_id: int = None,
-    word_links: list[dict[str, Any]] = None
 ):
     return {
         "id": id,
         "word": word or "teeeeeeeest",
         "part_of_speech": part_of_speech or "noun",
         "language_id": language_id or 1,
-        "word_links": word_links or [],
+    }
+
+
+def word_request_factory(
+    id: int = None,
+    *,
+    word: str = None,
+    part_of_speech: str = None,
+    language_id: int = None,
+    word_links: list[int] = None,
+):
+    return {
+        **base_word_factory(
+            id=id, word=word, part_of_speech=part_of_speech, language_id=language_id
+        ),
+        "word_links": word_links,
+    }
+
+
+def word_response_factory(
+    id: int = None,
+    *,
+    word: str = None,
+    part_of_speech: str = None,
+    language_id: int = None,
+    word_links: list[dict[str, Any]] = None,
+):
+    return {
+        **base_word_factory(
+            id=id, word=word, part_of_speech=part_of_speech, language_id=language_id
+        ),
+        "word_links": word_links,
     }
