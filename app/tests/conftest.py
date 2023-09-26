@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import config, security
 from app.core.session import async_engine, async_session
 from app.main import app
-from app.models import Base, Language, User, WordLink
-from app.tests.shapes import word_link_factory
+from app.models import Base, Language, User, Word, WordLink
+from app.tests.shapes import word_factory, word_link_factory
 
 default_user_id = "b75365d9-7bf9-4f54-add5-aeab333a087b"
 default_user_email = "geralt@wiedzmin.pl"
@@ -21,7 +21,10 @@ default_user_access_token = security.create_jwt_token(
     str(default_user_id), 60 * 60 * 24, refresh=False
 )[0]
 default_language_name = "test language"
+secondary_language_name = "second language"
 default_word_link_def = "test"
+default_word_name = "teeeeeeeest"
+secondary_word_name = "new word"
 
 
 @pytest.fixture(scope="session")
@@ -107,6 +110,26 @@ async def default_language(test_db_setup_sessionmaker) -> Language:
 
 
 @pytest_asyncio.fixture
+async def second_language(test_db_setup_sessionmaker) -> Language:
+    async with async_session() as session:
+        result = await session.execute(
+            select(Language).where(Language.name == secondary_language_name)
+        )
+        language = result.scalars().first()
+        if language is None:
+            new_language = Language(
+                name=secondary_language_name,
+                description="test description",
+                user_id=default_user_id,
+            )
+            session.add(new_language)
+            await session.commit()
+            await session.refresh(new_language)
+            return new_language
+        return language
+
+
+@pytest_asyncio.fixture
 async def default_word_link(test_db_setup_sessionmaker) -> WordLink:
     async with async_session() as session:
         result = await session.execute(
@@ -122,3 +145,51 @@ async def default_word_link(test_db_setup_sessionmaker) -> WordLink:
             await session.refresh(new_word_link)
             return new_word_link
     return word_link
+
+
+@pytest_asyncio.fixture
+async def default_word(
+    test_db_setup_sessionmaker, default_word_link: WordLink, default_language: Language
+) -> Word:
+    async with async_session() as session:
+        result = await session.execute(
+            select(Word).where(Word.word == default_word_name)
+        )
+        word_def = result.scalars().first()
+        if word_def is None:
+            new_word = Word(
+                **word_factory(
+                    word=default_word_name,
+                    language_id=default_language.id,
+                )
+            )
+            new_word.word_links.append(default_word_link)
+            session.add(new_word)
+            await session.commit()
+            await session.refresh(new_word)
+            return new_word
+        return word_def
+
+
+@pytest_asyncio.fixture
+async def second_word(
+    test_db_setup_sessionmaker, default_word_link: WordLink, second_language: Language
+) -> Word:
+    async with async_session() as session:
+        result = await session.execute(
+            select(Word).where(Word.word == secondary_word_name)
+        )
+        word_def = result.scalars().first()
+        if word_def is None:
+            new_word = Word(
+                **word_factory(
+                    word=secondary_word_name,
+                    language_id=second_language.id,
+                )
+            )
+            new_word.word_links.append(default_word_link)
+            session.add(new_word)
+            await session.commit()
+            await session.refresh(new_word)
+            return new_word
+        return word_def

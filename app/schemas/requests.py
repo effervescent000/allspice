@@ -30,3 +30,12 @@ class WordLinkRequest(BaseRequest):
     definition: str
     hint: str | None = None
     part_of_speech: str
+
+
+class WordRequest(BaseRequest):
+    id: int | None = None
+    word: str
+    part_of_speech: str
+    notes: str | None = None
+
+    word_link_ids: list[int] = []

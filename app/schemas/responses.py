@@ -31,3 +31,11 @@ class WordLinkResponse(BaseResponse):
     definition: str
     hint: str | None
     part_of_speech: str
+
+
+class WordResponse(BaseResponse):
+    id: int
+    word: str
+    part_of_speech: str
+
+    language_id: int

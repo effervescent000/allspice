@@ -75,8 +75,14 @@ class Language(AuditTimestamps, Base):
 word_link_to_word = Table(
     "word_link_to_word",
     Base.metadata,
-    Column("word_link_id", ForeignKey("word_link_model.id"), primary_key=True),
-    Column("word_id", ForeignKey("word_model.id"), primary_key=True),
+    Column(
+        "word_link_id",
+        ForeignKey("word_link_model.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "word_id", ForeignKey("word_model.id", ondelete="CASCADE"), primary_key=True
+    ),
 )
 
 
