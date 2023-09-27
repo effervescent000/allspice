@@ -42,3 +42,7 @@ class WordResponse(BaseResponse):
     word_links: list[WordLinkResponse]
 
     language_id: int
+
+
+class SCOutput(BaseResponse):
+    output: list[str]

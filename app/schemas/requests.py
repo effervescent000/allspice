@@ -40,3 +40,8 @@ class WordRequest(BaseRequest):
     language_id: int
 
     word_link_ids: list[int] = []
+
+
+class SCInput(BaseRequest):
+    word_list: list[str]
+    sound_changes: str
