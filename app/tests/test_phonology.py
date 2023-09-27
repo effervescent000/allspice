@@ -45,3 +45,15 @@ async def test_get_phones(
             "composed_phone": "k",
         }
     ]
+
+
+async def test_delete_phone(
+    client: AsyncClient,
+    default_user_headers,
+    default_phone: Phone,
+):
+    response = await client.delete(
+        app.url_path_for("delete_phone", phone_id=default_phone.id),
+        headers=default_user_headers,
+    )
+    assert response.status_code == 204

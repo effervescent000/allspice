@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
@@ -43,3 +43,16 @@ async def get_language_phones(
         await session.scalars(select(Phone).where(Phone.language_id == language_id))
     ).all()
     return phones
+
+
+@router.delete("/{phone_id}", status_code=204)
+async def delete_phone(
+    phone_id: int,
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    await verify_ownership(
+        session, current_user=current_user, schema=Phone, target_ids=[phone_id]
+    )
+    await session.execute(delete(Phone).where(Phone.id == phone_id))
+    await session.commit()
