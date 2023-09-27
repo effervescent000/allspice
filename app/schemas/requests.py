@@ -42,6 +42,15 @@ class WordRequest(BaseRequest):
     word_link_ids: list[int] = []
 
 
+class PhoneRequest(BaseRequest):
+    id: int | None = None
+    base_phone: str
+    quality: str | None = None
+    graph: str | None = None
+    vowel: bool | None = False
+    language_id: int
+
+
 class SCInput(BaseRequest):
     word_list: list[str]
     sound_changes: str

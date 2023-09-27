@@ -1,3 +1,8 @@
 from datetime import datetime
 
-get_now_int = int(datetime.now().timestamp())
+
+def get_now_int():
+    return int(datetime.now().timestamp())
+
+
+QUALITY_DIACRITIC_LOOKUP = {"long": "ː"}

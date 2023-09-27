@@ -78,16 +78,10 @@ async def delete_word(
 ):
     # first, verify that the user owns this word
     word = (
-        (
-            await session.execute(
-                select(Word)
-                .where(Word.id == word_id)
-                .options(joinedload(Word.language))
-            )
+        await session.scalars(
+            select(Word).where(Word.id == word_id).options(joinedload(Word.language))
         )
-        .scalars()
-        .first()
-    )
+    ).first()
     if word.language.user_id != current_user.id:
         raise HTTPException(401)
 

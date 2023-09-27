@@ -44,5 +44,16 @@ class WordResponse(BaseResponse):
     language_id: int
 
 
+class PhoneResponse(BaseResponse):
+    id: int
+    base_phone: str
+    quality: str | None
+    graph: str | None
+    vowel: bool
+    language_id: int
+
+    composed_phone: str
+
+
 class SCOutput(BaseResponse):
     output: list[str]

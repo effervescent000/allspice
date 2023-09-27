@@ -25,7 +25,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-from app.utils.utils import get_now_int
+from app.utils.utils import QUALITY_DIACRITIC_LOOKUP, get_now_int
 
 
 class Base(DeclarativeBase):
@@ -116,3 +116,22 @@ class Word(AuditTimestamps, LanguageRelated, Base):
     word_links: Mapped[list["WordLink"]] = relationship(
         secondary=word_link_to_word, back_populates="words", lazy="joined"
     )
+
+
+class Phone(LanguageRelated, Base):
+    __tablename__ = "phone_model"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    base_phone: Mapped[str] = mapped_column(String(10))
+    quality: Mapped[str | None]
+    graph: Mapped[str | None]
+    vowel: Mapped[bool]
+
+    @property
+    def composed_phone(self):
+        return (
+            self.base_phone + QUALITY_DIACRITIC_LOOKUP[self.quality]
+            if self.quality
+            else self.base_phone
+        )

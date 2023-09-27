@@ -1,0 +1,32 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api import deps
+from app.models import Phone, User
+from app.schemas.requests import PhoneRequest
+from app.schemas.responses import PhoneResponse
+from app.utils.db_utils import verify_ownership
+
+router = APIRouter()
+
+
+@router.post("/", response_model=list[PhoneResponse])
+async def upsert_phones(
+    phones: list[PhoneRequest],
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    await verify_ownership(
+        session,
+        current_user=current_user,
+        schema=Phone,
+        target_ids=[x.id for x in phones],
+    )
+
+    output = []
+    for phone in phones:
+        new_phone = Phone(**phone.model_dump())
+        upserted = await session.merge(new_phone)
+        await session.commit()
+        output.append(upserted)
+    return output

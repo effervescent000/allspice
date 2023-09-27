@@ -2,7 +2,7 @@ from typing import Any
 
 
 def prune_fields(
-    *, data: list[dict[str, Any]], fields: list[str], nest: list[str] = []
+    *, data: list[dict[str, Any]], fields: list[str] = ["id"], nest: list[str] = []
 ):
     for x in data:
         for field in fields:
@@ -74,4 +74,23 @@ def word_response_factory(
             id=id, word=word, part_of_speech=part_of_speech, language_id=language_id
         ),
         "word_links": word_links,
+    }
+
+
+def phone_factory(
+    id: int = None,
+    *,
+    base_phone: str = None,
+    quality: str = None,
+    graph: str = None,
+    vowel: bool = None,
+    language_id: int,
+):
+    return {
+        "id": id,
+        "base_phone": base_phone or "k",
+        "quality": quality,
+        "graph": graph,
+        "vowel": vowel or False,
+        "language_id": language_id,
     }
