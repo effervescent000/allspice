@@ -1,7 +1,7 @@
 from httpx import AsyncClient
 
 from app.main import app
-from app.models import Language
+from app.models import Language, Phone
 from app.tests.shapes import phone_factory, prune_fields
 
 
@@ -25,3 +25,23 @@ async def test_upsert_phones(
             }
         ]
     )
+
+
+async def test_get_phones(
+    client: AsyncClient,
+    default_user_headers,
+    default_language: Language,
+    default_phone: Phone,
+):
+    response = await client.get(
+        app.url_path_for("get_language_phones", language_id=default_language.id),
+        headers=default_user_headers,
+    )
+    phones = response.json()
+    assert len(phones) == 1
+    assert phones == [
+        {
+            **phone_factory(id=1001, base_phone="k", language_id=default_language.id),
+            "composed_phone": "k",
+        }
+    ]

@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import config, security
 from app.core.session import async_engine, async_session
 from app.main import app
-from app.models import Base, Language, User, Word, WordLink
-from app.tests.shapes import base_word_factory, word_link_factory
+from app.models import Base, Language, Phone, User, Word, WordLink
+from app.tests.shapes import base_word_factory, phone_factory, word_link_factory
 
 default_user_id = "b75365d9-7bf9-4f54-add5-aeab333a087b"
 default_user_email = "geralt@wiedzmin.pl"
@@ -27,6 +27,7 @@ default_word_link_id = 1001
 secondary_word_link_def = "new"
 default_word_name = "teeeeeeeest"
 secondary_word_name = "new word"
+default_phone_name = "k"
 
 
 @pytest.fixture(scope="session")
@@ -109,6 +110,31 @@ async def default_language(test_db_setup_sessionmaker) -> Language:
             await session.refresh(new_language)
             return new_language
         return language
+
+
+@pytest_asyncio.fixture
+async def default_phone(
+    test_db_setup_sessionmaker, default_language: Language
+) -> Phone:
+    async with async_session() as session:
+        phone = (
+            await session.scalars(
+                select(Phone)
+                .where(Phone.base_phone == default_phone_name)
+                .where(Phone.language_id == default_language.id)
+            )
+        ).first()
+        if phone is None:
+            new_phone = Phone(
+                **phone_factory(
+                    id=1001, base_phone="k", language_id=default_language.id
+                )
+            )
+            session.add(new_phone)
+            await session.commit()
+            await session.refresh(new_phone)
+            return new_phone
+        return phone
 
 
 @pytest_asyncio.fixture
