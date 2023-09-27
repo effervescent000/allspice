@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class BaseRequest(BaseModel):
@@ -49,6 +49,13 @@ class PhoneRequest(BaseRequest):
     graph: str | None = None
     vowel: bool | None = False
     language_id: int
+
+    @field_validator("graph", "quality")
+    @classmethod
+    def nullify_empty_strings(cls, v: str | None) -> str | None:
+        if v == "":
+            return None
+        return v
 
 
 class SCInput(BaseRequest):
