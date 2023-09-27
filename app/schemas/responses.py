@@ -37,6 +37,7 @@ class WordResponse(BaseResponse):
     id: int
     word: str
     part_of_speech: str
+    notes: str | None
 
     word_links: list[WordLinkResponse]
 

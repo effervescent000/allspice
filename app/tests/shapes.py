@@ -34,12 +34,14 @@ def base_word_factory(
     word: str = None,
     part_of_speech: str = None,
     language_id: int = None,
+    notes: str = None,
 ):
     return {
         "id": id,
         "word": word or "teeeeeeeest",
         "part_of_speech": part_of_speech or "noun",
         "language_id": language_id or 1,
+        "notes": notes,
     }
 
 
