@@ -95,3 +95,15 @@ async def test_upsert_words_add_word_link(
             ],
         )
     ]
+
+
+async def test_delete_word(
+    client: AsyncClient,
+    default_user_headers,
+    default_word: Word,
+):
+    response = await client.delete(
+        app.url_path_for("delete_word", word_id=default_word.id),
+        headers=default_user_headers,
+    )
+    assert response.status_code == 204

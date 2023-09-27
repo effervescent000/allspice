@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.api import deps
 from app.models import Language, User, Word, WordLink
@@ -37,10 +38,11 @@ async def upsert_words(
     if len(language_ids) > 1:
         raise HTTPException(status_code=400, detail="Too many languages")
 
-    language_result = await session.execute(
-        select(Language).where(Language.id.in_(language_ids))
+    language = (
+        (await session.execute(select(Language).where(Language.id.in_(language_ids))))
+        .scalars()
+        .first()
     )
-    language = language_result.scalars().first()
     if language.user_id != current_user.id:
         raise HTTPException(status_code=401)
 
@@ -66,3 +68,28 @@ async def upsert_words(
 
         output.append(word_to_upsert)
     return output
+
+
+@router.delete("/{word_id}", status_code=204)
+async def delete_word(
+    word_id: int,
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    # first, verify that the user owns this word
+    word = (
+        (
+            await session.execute(
+                select(Word)
+                .where(Word.id == word_id)
+                .options(joinedload(Word.language))
+            )
+        )
+        .scalars()
+        .first()
+    )
+    if word.language.user_id != current_user.id:
+        raise HTTPException(401)
+
+    await session.delete(word)
+    await session.commit()

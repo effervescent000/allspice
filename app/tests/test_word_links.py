@@ -26,7 +26,7 @@ async def test_get_word_links(
     )
     word_links = response.json()
     assert len(word_links) == 1
-    assert word_links == [word_link_factory(id=1, definition="test")]
+    assert word_links == [word_link_factory(id=default_word_link.id, definition="test")]
 
 
 async def test_delete_word_link(

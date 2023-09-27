@@ -17,7 +17,13 @@ import uuid
 
 from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    declared_attr,
+    mapped_column,
+    relationship,
+)
 
 from app.utils.utils import get_now_int
 
@@ -36,9 +42,9 @@ class LanguageRelated:
         ForeignKey("language_model.id", ondelete="CASCADE")
     )
 
-    # @declared_attr
-    # def language(self) -> Mapped["Language"]:
-    #     return relationship("Language")
+    @declared_attr
+    def language(self) -> Mapped["Language"]:
+        return relationship("Language", viewonly=True)
 
 
 class User(AuditTimestamps, Base):
