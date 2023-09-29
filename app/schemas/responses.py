@@ -57,3 +57,11 @@ class PhoneResponse(BaseResponse):
 
 class SCOutput(BaseResponse):
     output: list[str]
+
+
+class SoundChangeRulesResponse(BaseResponse):
+    id: int
+    name: str | None
+    content: str
+    role: str | None
+    language_id: int

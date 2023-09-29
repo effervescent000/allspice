@@ -68,3 +68,11 @@ class PhonologyRequest(BaseRequest):
 class SCInput(BaseRequest):
     word_list: list[str]
     sound_changes_id: int
+
+
+class SoundChangeRulesRequest(BaseRequest):
+    id: int | None = None
+    name: str | None = None
+    content: str
+    role: str | None = None
+    language_id: int

@@ -7,13 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
 from app.models import SoundChangeRules, User
-from app.schemas.requests import SCInput
-from app.schemas.responses import SCOutput
+from app.schemas.requests import SCInput, SoundChangeRulesRequest
+from app.schemas.responses import SCOutput, SoundChangeRulesResponse
+from app.utils.db_utils import verify_ownership
 
 router = APIRouter()
 
 
-@router.post("/", response_model=SCOutput)
+@router.post("/apply", response_model=SCOutput)
 async def sca(
     input: list[SCInput],
     current_user: User = Depends(deps.get_current_user),
@@ -51,3 +52,24 @@ async def sca(
         output.extend(out_file.read().splitlines())
         out_file.close()
     return {"output": output}
+
+
+@router.post("/", response_model=list[SoundChangeRulesResponse])
+async def upsert_sound_changes(
+    sound_change_rules: list[SoundChangeRulesRequest],
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    await verify_ownership(
+        session,
+        current_user=current_user,
+        schema=SoundChangeRules,
+        target_ids=[x.id for x in sound_change_rules if x.id is not None],
+    )
+
+    upserted = []
+    for ruleset in sound_change_rules:
+        new = await session.merge(SoundChangeRules(**ruleset.model_dump()))
+        upserted.append(new)
+    await session.commit()
+    return upserted
