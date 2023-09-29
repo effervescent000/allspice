@@ -10,8 +10,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import config, security
 from app.core.session import async_engine, async_session
 from app.main import app
-from app.models import Base, Language, Phone, User, Word, WordLink
-from app.tests.shapes import base_word_factory, phone_factory, word_link_factory
+from app.models import Base, Language, Phone, SoundChangeRules, User, Word, WordLink
+from app.tests.shapes import (
+    base_word_factory,
+    phone_factory,
+    sound_change_rules_factory,
+    word_link_factory,
+)
 
 default_user_id = "b75365d9-7bf9-4f54-add5-aeab333a087b"
 default_user_email = "geralt@wiedzmin.pl"
@@ -241,3 +246,26 @@ async def second_word(
             await session.refresh(new_word)
             return new_word
         return word_def
+
+
+@pytest_asyncio.fixture
+async def default_sound_change_rules(
+    test_db_setup_sessionmaker, default_language: Language
+) -> SoundChangeRules:
+    async with async_session() as session:
+        sound_change_rules = (
+            await session.scalars(
+                select(SoundChangeRules).where(
+                    SoundChangeRules.language_id == default_language.id
+                )
+            )
+        ).first()
+        if sound_change_rules is None:
+            new_rules = SoundChangeRules(
+                **sound_change_rules_factory(language_id=default_language.id)
+            )
+            session.add(new_rules)
+            await session.commit()
+            await session.refresh(new_rules)
+            return new_rules
+        return sound_change_rules

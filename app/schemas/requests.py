@@ -67,4 +67,4 @@ class PhonologyRequest(BaseRequest):
 
 class SCInput(BaseRequest):
     word_list: list[str]
-    sound_changes: str
+    sound_changes_id: int

@@ -73,6 +73,9 @@ class Language(AuditTimestamps, Base):
     phones: Mapped[list["Phone"]] = relationship(
         back_populates="language", cascade="delete, delete-orphan"
     )
+    sound_change_rules: Mapped[list["SoundChangeRules"]] = relationship(
+        back_populates="language", cascade="delete, delete-orphan"
+    )
 
 
 word_link_to_word = Table(
@@ -143,3 +146,19 @@ class Phone(Base):
             if self.quality
             else self.base_phone
         )
+
+
+class SoundChangeRules(Base):
+    __tablename__ = "sound_change_rules_model"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    name: Mapped[str | None]
+    content: Mapped[str]
+    role: Mapped[str | None]
+
+    language_id: Mapped[int] = mapped_column(
+        ForeignKey("language_model.id", ondelete="CASCADE")
+    )
+
+    language: Mapped["Language"] = relationship(back_populates="sound_change_rules")

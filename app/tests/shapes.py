@@ -94,3 +94,20 @@ def phone_factory(
         "vowel": vowel or False,
         "language_id": language_id,
     }
+
+
+def sound_change_rules_factory(
+    id: int = None,
+    *,
+    content: str = None,
+    language_id: int,
+    name: str = None,
+    role: str = None,
+):
+    return {
+        "id": id,
+        "content": content or "dummy-rule:\ne => a",
+        "language_id": language_id,
+        "name": name,
+        "role": role,
+    }

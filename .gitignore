@@ -136,5 +136,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
+# vscode
 .vscode
+
+# sound change related stuff
+*.wli
+*.wlm
+*.lsc
