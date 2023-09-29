@@ -269,3 +269,28 @@ async def default_sound_change_rules(
             await session.refresh(new_rules)
             return new_rules
         return sound_change_rules
+
+
+@pytest_asyncio.fixture
+async def spelling_sound_change_rules(
+    test_db_setup_sessionmaker, default_language: Language
+) -> SoundChangeRules:
+    async with async_session() as session:
+        sound_change_rules = (
+            await session.scalars(
+                select(SoundChangeRules)
+                .where(SoundChangeRules.language_id == default_language.id)
+                .where(SoundChangeRules.role == "spelling")
+            )
+        ).first()
+        if sound_change_rules is None:
+            new_rules = SoundChangeRules(
+                **sound_change_rules_factory(
+                    language_id=default_language.id, role="spelling"
+                )
+            )
+            session.add(new_rules)
+            await session.commit()
+            await session.refresh(new_rules)
+            return new_rules
+        return sound_change_rules

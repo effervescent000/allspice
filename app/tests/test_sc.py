@@ -1,12 +1,14 @@
 from httpx import AsyncClient
 
 from app.main import app
-from app.models import Language
+from app.models import Language, SoundChangeRules
 from app.tests.shapes import sound_change_rules_factory
 
 
 async def test_sca(
-    client: AsyncClient, default_user_headers, default_sound_change_rules
+    client: AsyncClient,
+    default_user_headers,
+    default_sound_change_rules: SoundChangeRules,
 ):
     response = await client.post(
         app.url_path_for("sca"),
@@ -34,3 +36,33 @@ async def test_upsert_sound_changes(
     data = response.json()
     assert len(data) == 1
     assert data[0]["content"] == "new-rule:\nunchanged"
+
+
+async def test_get_sc_with_role(
+    client: AsyncClient,
+    default_user_headers,
+    default_sound_change_rules: SoundChangeRules,
+    spelling_sound_change_rules: SoundChangeRules,
+):
+    response = await client.get(
+        app.url_path_for("read_sound_changes"),
+        headers=default_user_headers,
+        params={"role": "spelling"},
+    )
+    rules = response.json()
+    assert len(rules) == 1
+    assert rules[0]["role"] == "spelling"
+
+
+async def test_get_sc_without_role(
+    client: AsyncClient,
+    default_user_headers,
+    default_sound_change_rules: SoundChangeRules,
+    spelling_sound_change_rules: SoundChangeRules,
+):
+    response = await client.get(
+        app.url_path_for("read_sound_changes"),
+        headers=default_user_headers,
+    )
+    rules = response.json()
+    assert len(rules) == 2
