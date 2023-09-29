@@ -70,7 +70,9 @@ class Language(AuditTimestamps, Base):
 
     user: Mapped["User"] = relationship(back_populates="languages")
     words: Mapped[list["Word"]] = relationship(back_populates="language")
-    phones: Mapped[list["Phone"]] = relationship(back_populates="language")
+    phones: Mapped[list["Phone"]] = relationship(
+        back_populates="language", cascade="delete, delete-orphan"
+    )
 
 
 word_link_to_word = Table(

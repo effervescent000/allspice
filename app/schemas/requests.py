@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, field_validator
 
 
@@ -56,6 +58,11 @@ class PhoneRequest(BaseRequest):
         if v == "":
             return None
         return v
+
+
+class PhonologyRequest(BaseRequest):
+    phonology: list[PhoneRequest]
+    mode: Literal["insert", "replace"]
 
 
 class SCInput(BaseRequest):

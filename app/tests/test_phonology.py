@@ -5,7 +5,7 @@ from app.models import Language, Phone
 from app.tests.shapes import phone_factory, prune_fields
 
 
-async def test_upsert_phones(
+async def test_upsert_phones_insert_only(
     client: AsyncClient,
     default_user_headers,
     default_language: Language,
@@ -13,7 +13,12 @@ async def test_upsert_phones(
     response = await client.post(
         app.url_path_for("upsert_phones"),
         headers=default_user_headers,
-        json=[phone_factory(language_id=default_language.id)],
+        json=[
+            {
+                "phonology": [phone_factory(language_id=default_language.id)],
+                "mode": "insert",
+            }
+        ],
     )
     phones = response.json()
     assert len(phones) == 1
@@ -25,6 +30,29 @@ async def test_upsert_phones(
             }
         ]
     )
+
+
+async def test_upsert_phones_replace(
+    client: AsyncClient,
+    default_user_headers,
+    default_language: Language,
+    default_phone: Phone,
+):
+    response = await client.post(
+        app.url_path_for("upsert_phones"),
+        headers=default_user_headers,
+        json=[
+            {
+                "phonology": [
+                    phone_factory(language_id=default_language.id, base_phone="p")
+                ],
+                "mode": "replace",
+            }
+        ],
+    )
+    phones = response.json()
+    assert len(phones) == 1
+    assert phones[0]["id"] != default_phone.id
 
 
 async def test_get_phones(

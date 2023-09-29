@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.api import deps
-from app.models import Phone, User
-from app.schemas.requests import PhoneRequest
+from app.models import Language, Phone, User
+from app.schemas.requests import PhonologyRequest
 from app.schemas.responses import PhoneResponse
 from app.utils.db_utils import verify_ownership
 
@@ -13,10 +14,16 @@ router = APIRouter()
 
 @router.post("/", response_model=list[PhoneResponse])
 async def upsert_phones(
-    phones: list[PhoneRequest],
+    phonology: list[PhonologyRequest],
     current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
+    """
+    Again, we're just popping off the first item in the list but accepting
+    a list for consistency's sake.
+    """
+    phones = phonology[0].phonology
+    mode = phonology[0].mode
     await verify_ownership(
         session,
         current_user=current_user,
@@ -24,13 +31,33 @@ async def upsert_phones(
         target_ids=[x.id for x in phones],
     )
 
-    output = []
-    for phone in phones:
-        new_phone = Phone(**phone.model_dump())
-        upserted = await session.merge(new_phone)
+    if mode == "insert":
+        output = []
+        for phone in phones:
+            new_phone = Phone(**phone.model_dump())
+            upserted = await session.merge(new_phone)
+            output.append(upserted)
         await session.commit()
-        output.append(upserted)
-    return output
+        return output
+    if mode == "replace":
+        language = (
+            (
+                await session.scalars(
+                    select(Language)
+                    .where(Language.id == phones[0].language_id)
+                    .options(joinedload(Language.phones))
+                )
+            )
+            .unique()
+            .first()
+        )
+        models = []
+        for phone in phones:
+            model = await session.merge(Phone(**phone.model_dump()))
+            models.append(model)
+        language.phones = models
+        await session.commit()
+        return models
 
 
 @router.get("/by_language/{language_id}", response_model=list[PhoneResponse])
