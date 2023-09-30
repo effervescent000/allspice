@@ -1,11 +1,11 @@
 from httpx import AsyncClient
 
 from app.main import app
-from app.models import Language, SoundChangeRules
+from app.models import Language, SoundChangeRules, Word
 from app.tests.shapes import sound_change_rules_factory
 
 
-async def test_sca(
+async def test_sca_with_words(
     client: AsyncClient,
     default_user_headers,
     default_sound_change_rules: SoundChangeRules,
@@ -19,6 +19,26 @@ async def test_sca(
     )
     content = response.json()["output"]
     assert content == ["tast"]
+
+
+async def test_sca_with_ids(
+    client: AsyncClient,
+    default_user_headers,
+    default_sound_change_rules: SoundChangeRules,
+    default_word: Word,
+):
+    response = await client.post(
+        app.url_path_for("sca"),
+        headers=default_user_headers,
+        json=[
+            {
+                "sound_changes_id": default_sound_change_rules.id,
+                "word_list": [str(default_word.id)],
+            }
+        ],
+    )
+    content = response.json()["output"]
+    assert content == ["taaaaaaaast"]
 
 
 async def test_upsert_sound_changes(

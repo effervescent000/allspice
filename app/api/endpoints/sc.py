@@ -1,12 +1,13 @@
 import os
+import re
 import subprocess
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
-from app.models import Language, SoundChangeRules, User
+from app.models import Language, SoundChangeRules, User, Word
 from app.schemas.requests import SCInput, SoundChangeRulesRequest
 from app.schemas.responses import SCOutput, SoundChangeRulesResponse
 from app.utils.db_utils import verify_ownership
@@ -23,7 +24,18 @@ async def sca(
     output = []
     for x in input:
         word_list = open("input.wli", "w")
-        word_list.write("\n".join(x.word_list))
+
+        ids_to_query = [
+            int(y) for y in x.word_list if re.match(r"^\d+$", y) is not None
+        ]
+        if len(ids_to_query) > 0:
+            if len(ids_to_query) != len(x.word_list):
+                raise HTTPException(400, detail="Only words or ids, not both")
+            stmnt = select(Word).where(Word.id.in_(ids_to_query))
+            result = (await session.scalars(stmnt)).unique().all()
+            word_list.write("\n".join(word.word for word in result))
+        else:
+            word_list.write("\n".join(x.word_list))
         word_list.close()
 
         sound_change_rules = (
