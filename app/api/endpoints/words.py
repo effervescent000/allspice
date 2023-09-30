@@ -22,6 +22,7 @@ async def get_all_words(
         .where(Word.language_id == language_id)
         .where(Language.user_id == current_user.id)
         .join(Language)
+        .order_by(Word.word)
     )
     words = result.unique().scalars().all()
     return words
