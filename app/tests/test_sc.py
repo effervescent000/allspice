@@ -38,6 +38,35 @@ async def test_upsert_sound_changes(
     assert data[0]["content"] == "new-rule:\nunchanged"
 
 
+async def test_upsert_sound_changes_dont_duplicate_spelling(
+    client: AsyncClient,
+    default_user_headers,
+    default_language: Language,
+    spelling_sound_change_rules: SoundChangeRules,
+):
+    await client.post(
+        app.url_path_for("upsert_sound_changes"),
+        headers=default_user_headers,
+        json=[
+            sound_change_rules_factory(
+                id=spelling_sound_change_rules.id,
+                content="new-rule:\nunchanged",
+                language_id=default_language.id,
+                role="spelling",
+            )
+        ],
+    )
+
+    get_response = await client.get(
+        app.url_path_for("read_sound_changes"),
+        headers=default_user_headers,
+        params={"role": "spelling"},
+    )
+
+    rules = get_response.json()
+    assert len(rules) == 1
+
+
 async def test_get_sc_with_role(
     client: AsyncClient,
     default_user_headers,
