@@ -10,11 +10,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import config, security
 from app.core.session import async_engine, async_session
 from app.main import app
-from app.models import Base, Language, Phone, SoundChangeRules, User, Word, WordLink
+from app.models import (
+    Base,
+    Language,
+    Phone,
+    SoundChangeRules,
+    User,
+    Word,
+    WordClass,
+    WordLink,
+)
 from app.tests.shapes import (
     base_word_factory,
     phone_factory,
     sound_change_rules_factory,
+    word_class_factory,
     word_link_factory,
 )
 
@@ -33,6 +43,8 @@ secondary_word_link_def = "new"
 default_word_name = "teeeeeeeest"
 secondary_word_name = "new word"
 default_phone_name = "k"
+default_word_class_name = "default word class"
+default_word_class_abbr = "dwc"
 
 
 @pytest.fixture(scope="session")
@@ -294,3 +306,30 @@ async def spelling_sound_change_rules(
             await session.refresh(new_rules)
             return new_rules
         return sound_change_rules
+
+
+@pytest_asyncio.fixture
+async def default_word_class(
+    test_db_setup_sessionmaker, default_language: Language
+) -> WordClass:
+    async with async_session() as session:
+        word_class = (
+            await session.scalars(
+                select(WordClass)
+                .where(WordClass.language_id == default_language.id)
+                .where(WordClass.name == default_word_class_name)
+            )
+        ).first()
+        if word_class is None:
+            new = WordClass(
+                **word_class_factory(
+                    language_id=default_language.id,
+                    name=default_word_class_name,
+                    abbreviation=default_word_class_abbr,
+                )
+            )
+            session.add(new)
+            await session.commit()
+            await session.refresh(new)
+            return new
+        return word_class
