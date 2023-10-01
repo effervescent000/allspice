@@ -195,3 +195,6 @@ class SoundChangeRules(Base):
     )
 
     language: Mapped["Language"] = relationship(back_populates="sound_change_rules")
+
+
+ORMType = type[Word] | type[WordClass] | type[WordLink] | type[SoundChangeRules]

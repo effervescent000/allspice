@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import pytest
 import pytest_asyncio
@@ -13,6 +14,7 @@ from app.main import app
 from app.models import (
     Base,
     Language,
+    ORMType,
     Phone,
     SoundChangeRules,
     User,
@@ -45,6 +47,29 @@ secondary_word_name = "new word"
 default_phone_name = "k"
 default_word_class_name = "default word class"
 default_word_class_abbr = "dwc"
+secondary_word_class_name = "secondary word class"
+secondary_word_class_abbr = "swc"
+
+
+async def get_or_insert_model(
+    schema: ORMType,
+    search_field: str,
+    search_value: str,
+    factory_output: dict[str, Any],
+):
+    async with async_session() as session:
+        result = (
+            await session.scalars(
+                select(schema).where(getattr(schema, search_field) == search_value)
+            )
+        ).first()
+        if result is None:
+            input = schema(**factory_output)
+            session.add(input)
+            await session.commit()
+            await session.refresh(input)
+            return input
+        return result
 
 
 @pytest.fixture(scope="session")
@@ -333,3 +358,19 @@ async def default_word_class(
             await session.refresh(new)
             return new
         return word_class
+
+
+@pytest_asyncio.fixture
+async def secondary_word_class(
+    test_db_setup_sessionmaker, default_language: Language
+) -> WordClass:
+    return await get_or_insert_model(
+        schema=WordClass,
+        search_field="name",
+        search_value=secondary_word_class_name,
+        factory_output=word_class_factory(
+            name=secondary_word_class_name,
+            abbreviation=secondary_word_class_abbr,
+            language_id=default_language.id,
+        ),
+    )

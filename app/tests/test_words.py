@@ -108,6 +108,46 @@ async def test_upsert_words_add_word_link(
     ]
 
 
+async def test_upsert_words_alter_word_classes(
+    client: AsyncClient,
+    default_user_headers,
+    default_language: Language,
+    default_word: Word,
+    default_word_class: WordClass,
+    secondary_word_class: WordClass,
+):
+    """Add a word class and remove another."""
+    response = await client.post(
+        app.url_path_for("upsert_words"),
+        headers=default_user_headers,
+        json=[
+            word_request_factory(
+                id=default_word.id,
+                language_id=default_language.id,
+                word_classes=[secondary_word_class.id],
+            )
+        ],
+    )
+    words = response.json()
+    assert len(words) == 1
+    assert len(words[0]["word_classes"]) == 1
+    assert words == [
+        word_response_factory(
+            id=default_word.id,
+            language_id=default_language.id,
+            word_links=[],
+            word_classes=[
+                word_class_factory(
+                    id=secondary_word_class.id,
+                    name="secondary word class",
+                    abbreviation="swc",
+                    language_id=default_language.id,
+                )
+            ],
+        )
+    ]
+
+
 async def test_delete_word(
     client: AsyncClient,
     default_user_headers,
