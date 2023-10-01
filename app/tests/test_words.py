@@ -1,9 +1,10 @@
 from httpx import AsyncClient
 
 from app.main import app
-from app.models import Language, Word, WordLink
+from app.models import Language, Word, WordClass, WordLink
 from app.tests.shapes import (
     prune_fields,
+    word_class_factory,
     word_link_factory,
     word_request_factory,
     word_response_factory,
@@ -40,27 +41,37 @@ async def test_upsert_words_create_word(
     default_user_headers,
     default_language: Language,
     default_word_link: WordLink,
+    default_word_class: WordClass,
 ):
     response = await client.post(
         app.url_path_for("upsert_words"),
         headers=default_user_headers,
         json=[
             word_request_factory(
-                language_id=default_language.id, word_links=[default_word_link.id]
+                language_id=default_language.id,
+                word_links=[default_word_link.id],
+                word_classes=[default_word_class.id],
             )
         ],
     )
     words = response.json()
     assert len(words) == 1
-    assert prune_fields(data=words, fields=["id"]) == prune_fields(
+    assert prune_fields(data=words, nest=["word_classes"]) == prune_fields(
         data=[
             word_response_factory(
                 id=1,
                 language_id=default_language.id,
                 word_links=[word_link_factory(id=default_word_link.id)],
+                word_classes=[
+                    word_class_factory(
+                        name="default word class",
+                        abbreviation="dwc",
+                        language_id=default_language.id,
+                    )
+                ],
             )
         ],
-        fields=["id"],
+        nest=["word_classes"],
     )
 
 

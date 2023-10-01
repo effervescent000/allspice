@@ -33,6 +33,14 @@ class WordLinkResponse(BaseResponse):
     part_of_speech: str
 
 
+class WordClassResponse(BaseResponse):
+    id: int
+    name: str
+    abbreviation: str
+    part_of_speech: str
+    language_id: int
+
+
 class WordResponse(BaseResponse):
     id: int
     word: str
@@ -40,6 +48,7 @@ class WordResponse(BaseResponse):
     notes: str | None
 
     word_links: list[WordLinkResponse]
+    word_classes: list[WordClassResponse]
 
     language_id: int
 
@@ -64,12 +73,4 @@ class SoundChangeRulesResponse(BaseResponse):
     name: str | None
     content: str
     role: str | None
-    language_id: int
-
-
-class WordClassResponse(BaseResponse):
-    id: int
-    name: str
-    abbreviation: str
-    part_of_speech: str
     language_id: int

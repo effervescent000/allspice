@@ -52,12 +52,14 @@ def word_request_factory(
     part_of_speech: str = None,
     language_id: int = None,
     word_links: list[int] = None,
+    word_classes: list[int] = None,
 ):
     return {
         **base_word_factory(
             id=id, word=word, part_of_speech=part_of_speech, language_id=language_id
         ),
-        "word_link_ids": word_links,
+        "word_link_ids": word_links or [],
+        "word_class_ids": word_classes or [],
     }
 
 
@@ -68,12 +70,14 @@ def word_response_factory(
     part_of_speech: str = None,
     language_id: int = None,
     word_links: list[dict[str, Any]] = None,
+    word_classes: list[dict[str, Any]] = None,
 ):
     return {
         **base_word_factory(
             id=id, word=word, part_of_speech=part_of_speech, language_id=language_id
         ),
-        "word_links": word_links,
+        "word_links": word_links or [],
+        "word_classes": word_classes or [],
     }
 
 

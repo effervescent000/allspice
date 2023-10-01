@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.api import deps
-from app.models import Language, User, Word, WordLink
+from app.models import Language, User, Word, WordClass, WordLink
 from app.schemas.requests import WordRequest
 from app.schemas.responses import WordResponse
 
@@ -50,19 +50,31 @@ async def upsert_words(
     # now upsert
     output = []
     for word in words:
-        new_word_links = (
+        word_links = (
             (
-                await session.execute(
+                await session.scalars(
                     select(WordLink).where(WordLink.id.in_(word.word_link_ids))
                 )
             )
             .unique()
-            .scalars()
             .all()
         )
-        word_to_upsert = Word(**word.model_dump(exclude=["word_link_ids"]))
+        word_classes = (
+            (
+                await session.scalars(
+                    select(WordClass).where(WordClass.id.in_(word.word_class_ids))
+                )
+            )
+            .unique()
+            .all()
+        )
 
-        word_to_upsert.word_links = new_word_links
+        word_to_upsert = Word(
+            **word.model_dump(exclude=["word_link_ids", "word_class_ids"])
+        )
+
+        word_to_upsert.word_links = word_links
+        word_to_upsert.word_classes = word_classes
         word_to_upsert = await session.merge(word_to_upsert)
 
         await session.commit()

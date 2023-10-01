@@ -42,6 +42,7 @@ class WordRequest(BaseRequest):
     language_id: int
 
     word_link_ids: list[int] = []
+    word_class_ids: list[int] = []
 
 
 class PhoneRequest(BaseRequest):
