@@ -76,3 +76,11 @@ class SoundChangeRulesRequest(BaseRequest):
     content: str
     role: str | None = None
     language_id: int
+
+
+class WordClassRequest(BaseRequest):
+    id: int | None = None
+    name: str
+    abbreviation: str
+    part_of_speech: str
+    language_id: int

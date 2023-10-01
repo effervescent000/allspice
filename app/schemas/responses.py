@@ -65,3 +65,11 @@ class SoundChangeRulesResponse(BaseResponse):
     content: str
     role: str | None
     language_id: int
+
+
+class WordClassResponse(BaseResponse):
+    id: int
+    name: str
+    abbreviation: str
+    part_of_speech: str
+    language_id: int

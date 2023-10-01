@@ -91,6 +91,36 @@ word_link_to_word = Table(
     ),
 )
 
+word_class_to_word = Table(
+    "word_class_to_word",
+    Base.metadata,
+    Column(
+        "word_class_id",
+        ForeignKey("word_class_model.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "word_id", ForeignKey("word_model.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
+
+
+class WordClass(AuditTimestamps, Base):
+    __tablename__ = "word_class_model"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    abbreviation: Mapped[str]
+    part_of_speech: Mapped[str]
+
+    language_id: Mapped[int] = mapped_column(
+        ForeignKey("language_model.id", ondelete="CASCADE")
+    )
+
+    language: Mapped["Language"] = relationship()
+    words: Mapped[list["Word"]] = relationship(
+        secondary=word_class_to_word, back_populates="word_classes"
+    )
+
 
 class WordLink(AuditTimestamps, Base):
     __tablename__ = "word_link_model"
@@ -116,11 +146,14 @@ class Word(AuditTimestamps, Base):
         ForeignKey("language_model.id", ondelete="CASCADE")
     )
 
+    language: Mapped["Language"] = relationship()
+
     word_links: Mapped[list["WordLink"]] = relationship(
         secondary=word_link_to_word, back_populates="words", lazy="joined"
     )
-
-    language: Mapped["Language"] = relationship()
+    word_classes: Mapped[list["WordClass"]] = relationship(
+        secondary=word_class_to_word, back_populates="words", lazy="joined"
+    )
 
 
 class Phone(Base):

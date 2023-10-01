@@ -111,3 +111,20 @@ def sound_change_rules_factory(
         "name": name,
         "role": role,
     }
+
+
+def word_class_factory(
+    id: int = None,
+    *,
+    name: str = None,
+    abbreviation: str = None,
+    part_of_speech: str = None,
+    language_id: int,
+):
+    return {
+        "id": id,
+        "name": name or "test word class",
+        "abbreviation": abbreviation or "twc",
+        "part_of_speech": part_of_speech or "verb",
+        "language_id": language_id,
+    }
