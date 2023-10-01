@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
@@ -17,12 +17,28 @@ async def upsert_word_classes(
     current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
+    found_ids = [x.id for x in word_classes if x.id is not None]
+
     await verify_ownership(
         session,
         current_user=current_user,
         schema=WordClass,
-        target_ids=[x.id for x in word_classes if x.id is not None],
+        target_ids=found_ids,
     )
+
+    new_ids = set(*found_ids)
+
+    existing_word_classes = (
+        await session.scalars(
+            select(WordClass).where(
+                WordClass.language_id == word_classes[0].language_id
+            )
+        )
+    ).all()
+
+    existing_ids = {x.id for x in existing_word_classes}
+    missing_ids = existing_ids - new_ids
+    await session.execute(delete(WordClass).where(WordClass.id.in_(missing_ids)))
 
     upserted = []
     for word_class in word_classes:

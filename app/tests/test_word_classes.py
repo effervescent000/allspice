@@ -47,3 +47,30 @@ async def test_get_all_word_classes(
             )
         ]
     )
+
+
+async def test_upsert_word_classes_with_delete(
+    client: AsyncClient,
+    default_user_headers,
+    default_language: Language,
+    default_word_class: WordClass,
+):
+    await client.post(
+        app.url_path_for("upsert_word_classes"),
+        headers=default_user_headers,
+        json=[
+            word_class_factory(
+                language_id=default_language.id,
+                name="brand new word class",
+                abbreviation="bnwc",
+            )
+        ],
+    )
+    get_response = await client.get(
+        app.url_path_for(
+            "get_all_word_classes_by_language", language_id=default_language.id
+        ),
+        headers=default_user_headers,
+    )
+    json = get_response.json()
+    assert len(json) == 1
