@@ -98,6 +98,8 @@ class GrammarTableCellRequest(BaseRequest):
     row_categories: list[str]
     column_categories: list[str]
 
+    sound_change_rules: SoundChangeRulesRequest
+
 
 class GrammarTableRequest(BaseRequest):
     id: int | None = None

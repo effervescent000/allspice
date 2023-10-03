@@ -101,6 +101,8 @@ class GrammarTableCellResponse(BaseResponse):
     row_categories: list[str]
     column_categories: list[str]
 
+    sound_change_rules: SoundChangeRulesResponse
+
     @field_validator("row_categories", "column_categories", mode="before")
     @classmethod
     def convert_json_to_list(cls, value: str) -> list[str]:

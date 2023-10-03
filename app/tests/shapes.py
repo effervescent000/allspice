@@ -4,12 +4,19 @@ from typing import Any
 def prune_fields(
     *, data: list[dict[str, Any]], fields: list[str] = ["id"], nest: list[str] = []
 ):
-    for x in data:
+    if isinstance(data, list):
+        for x in data:
+            for field in fields:
+                x.pop(field)
+            for field in nest:
+                if x.get(field):
+                    x[field] = prune_fields(data=x[field], fields=fields, nest=nest)
+    else:
         for field in fields:
-            x.pop(field)
+            data.pop(field)
         for field in nest:
-            if x.get(field):
-                x[field] = prune_fields(data=x[field], fields=["id"])
+            if data.get(field):
+                data[field] = prune_fields(data=x[field], fields=fields, nest=nest)
     return data
 
 
@@ -166,10 +173,15 @@ def grammar_table_request_factory(
 
 
 def grammar_cell_factory(
-    id: int = None, *, row_categories: list[str], column_categories: list[str]
+    id: int = None,
+    *,
+    row_categories: list[str],
+    column_categories: list[str],
+    sound_change_rules: dict[str, Any],
 ):
     return {
         "id": id,
         "row_categories": row_categories,
         "column_categories": column_categories,
+        "sound_change_rules": sound_change_rules,
     }

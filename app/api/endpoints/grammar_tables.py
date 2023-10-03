@@ -11,6 +11,7 @@ from app.models import (
     GrammarTableColumn,
     GrammarTableRow,
     Language,
+    SoundChangeRules,
     User,
     WordClass,
 )
@@ -79,9 +80,21 @@ async def upsert_grammar_tables(
         ]
         cells = [
             GrammarTableCell(
-                **x.model_dump(exclude=["row_categories", "column_categories"]),
+                **x.model_dump(
+                    exclude=[
+                        "row_categories",
+                        "column_categories",
+                        "sound_change_rules",
+                    ]
+                ),
                 row_categories=json.dumps(x.row_categories),
-                column_categories=json.dumps(x.column_categories)
+                column_categories=json.dumps(x.column_categories),
+                sound_change_rules=SoundChangeRules(
+                    **x.sound_change_rules.model_dump(
+                        exclude=["role"],
+                    ),
+                    role="grammar_table"
+                )
             )
             for x in table.cells
         ]

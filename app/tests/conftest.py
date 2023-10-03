@@ -389,6 +389,7 @@ async def default_grammar_table(
     test_db_setup_sessionmaker,
     default_language: Language,
     default_word_class: WordClass,
+    default_sound_change_rules: SoundChangeRules,
 ) -> GrammarTable:
     async with async_session() as session:
         table = (
@@ -413,7 +414,13 @@ async def default_grammar_table(
                 cells=[
                     GrammarTableCell(
                         **grammar_cell_factory(
-                            row_categories='["test"]', column_categories='["another"]'
+                            row_categories='["test"]',
+                            column_categories='["another"]',
+                            sound_change_rules=SoundChangeRules(
+                                **sound_change_rules_factory(
+                                    language_id=default_language.id
+                                )
+                            ),
                         )
                     )
                 ],

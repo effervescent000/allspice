@@ -8,6 +8,7 @@ from app.tests.shapes import (
     grammar_table_base_factory,
     grammar_table_request_factory,
     prune_fields,
+    sound_change_rules_factory,
     word_class_factory,
 )
 
@@ -18,6 +19,14 @@ async def test_upsert_grammar_tables(
     default_language: Language,
     default_word_class: WordClass,
 ):
+    grammar_cell = grammar_cell_factory(
+        row_categories=["test"],
+        column_categories=["another"],
+        sound_change_rules=sound_change_rules_factory(
+            language_id=default_language.id, role="grammar_table"
+        ),
+    )
+
     response = await client.post(
         app.url_path_for("upsert_grammar_tables"),
         headers=default_user_headers,
@@ -27,11 +36,7 @@ async def test_upsert_grammar_tables(
                 "word_class_ids": [default_word_class.id],
                 "rows": [grammar_category_factory(content=["test"])],
                 "columns": [grammar_category_factory(content=["another"])],
-                "cells": [
-                    grammar_cell_factory(
-                        row_categories=["test"], column_categories=["another"]
-                    )
-                ],
+                "cells": [grammar_cell],
             }
         ],
     )
@@ -39,18 +44,15 @@ async def test_upsert_grammar_tables(
     assert len(json) == 1
     assert isinstance(json[0]["id"], int)
     assert prune_fields(
-        data=json, nest=["rows", "columns", "cells", "word_classes"]
+        data=json,
+        nest=["rows", "columns", "cells", "word_classes", "sound_change_rules"],
     ) == prune_fields(
         data=[
             {
                 **grammar_table_base_factory(language_id=default_language.id),
                 "rows": [grammar_category_factory(content=["test"])],
                 "columns": [grammar_category_factory(content=["another"])],
-                "cells": [
-                    grammar_cell_factory(
-                        row_categories=["test"], column_categories=["another"]
-                    )
-                ],
+                "cells": [grammar_cell],
                 "word_classes": [
                     word_class_factory(
                         name="default word class",
@@ -60,7 +62,7 @@ async def test_upsert_grammar_tables(
                 ],
             }
         ],
-        nest=["rows", "columns", "cells", "word_classes"],
+        nest=["rows", "columns", "cells", "word_classes", "sound_change_rules"],
     )
 
 
