@@ -275,8 +275,12 @@ class GrammarTableCell(Base):
     grammar_table_id: Mapped[int] = mapped_column(
         ForeignKey("grammar_table_model.id", ondelete="CASCADE")
     )
-
     grammar_table: Mapped["GrammarTable"] = relationship(back_populates="cells")
+
+    sound_change_rules_id: Mapped[int] = mapped_column(
+        ForeignKey("sound_change_rules_model.id", ondelete="CASCADE")
+    )
+    sound_change_rules: Mapped["SoundChangeRules"] = relationship()
 
 
 ORMType = (
