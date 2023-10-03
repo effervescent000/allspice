@@ -85,3 +85,29 @@ class WordClassRequest(BaseRequest):
     abbreviation: str
     part_of_speech: str
     language_id: int
+
+
+class GrammarTableCategoryRequest(BaseRequest):
+    id: int | None = None
+    content: list[str]
+
+
+class GrammarTableCellRequest(BaseRequest):
+    id: int | None = None
+
+    row_categories: list[str]
+    column_categories: list[str]
+
+
+class GrammarTableRequest(BaseRequest):
+    id: int | None = None
+    name: str
+    part_of_speech: str
+    language_id: int
+
+    word_class_ids: list[int] = []
+
+    rows: list[GrammarTableCategoryRequest]
+    columns: list[GrammarTableCategoryRequest]
+
+    cells: list[GrammarTableCellRequest]

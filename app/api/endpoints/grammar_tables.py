@@ -1,0 +1,78 @@
+import json
+
+from fastapi import APIRouter, Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api import deps
+from app.models import (
+    GrammarTable,
+    GrammarTableCell,
+    GrammarTableColumn,
+    GrammarTableRow,
+    User,
+    WordClass,
+)
+from app.schemas.requests import GrammarTableRequest
+from app.schemas.responses import GrammarTableResponse
+from app.utils.db_utils import verify_ownership
+
+router = APIRouter()
+
+
+@router.post("/", response_model=list[GrammarTableResponse])
+async def upsert_grammar_tables(
+    grammar_tables: list[GrammarTableRequest],
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    found_ids = {x.id for x in grammar_tables if x.id is not None}
+
+    await verify_ownership(
+        session, current_user=current_user, schema=GrammarTable, target_ids=found_ids
+    )
+
+    upserted = []
+    for table in grammar_tables:
+        word_class_ids = table.word_class_ids
+
+        to_upsert = GrammarTable(
+            **table.model_dump(exclude=["word_class_ids", "rows", "columns", "cells"])
+        )
+
+        rows = [
+            GrammarTableRow(
+                **x.model_dump(exclude=["content"]), content=json.dumps(x.content)
+            )
+            for x in table.rows
+        ]
+        columns = [
+            GrammarTableColumn(
+                **x.model_dump(exclude=["content"]), content=json.dumps(x.content)
+            )
+            for x in table.columns
+        ]
+        cells = [
+            GrammarTableCell(
+                **x.model_dump(exclude=["row_categories", "column_categories"]),
+                row_categories=json.dumps(x.row_categories),
+                column_categories=json.dumps(x.column_categories)
+            )
+            for x in table.cells
+        ]
+
+        word_classes = (
+            await session.scalars(
+                select(WordClass).where(WordClass.id.in_(word_class_ids))
+            )
+        ).all()
+        to_upsert.word_classes = word_classes
+        to_upsert.rows = rows
+        to_upsert.columns = columns
+        to_upsert.cells = cells
+
+        merged = await session.merge(to_upsert)
+
+        upserted.append(merged)
+    await session.commit()
+    return upserted

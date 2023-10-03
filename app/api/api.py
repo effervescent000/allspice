@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.endpoints import (
     auth,
+    grammar_tables,
     languages,
     phonology,
     sc,
@@ -21,4 +22,7 @@ api_router.include_router(phonology.router, prefix="/phonology", tags=["phonolog
 api_router.include_router(sc.router, prefix="/sc", tags=["sound_change"])
 api_router.include_router(
     word_classes.router, prefix="/word_classes", tags=["words", "word_classes"]
+)
+api_router.include_router(
+    grammar_tables.router, prefix="/grammar_tables", tags=["grammar_tables"]
 )

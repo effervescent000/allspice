@@ -1,4 +1,7 @@
-from pydantic import BaseModel, ConfigDict
+import json
+
+from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic_core import ValidationError
 
 
 class BaseResponse(BaseModel):
@@ -74,3 +77,51 @@ class SoundChangeRulesResponse(BaseResponse):
     content: str
     role: str | None
     language_id: int
+
+
+class GrammarTableCategoryResponse(BaseResponse):
+    id: int
+    content: list[str]
+
+    @field_validator("content", mode="before")
+    @classmethod
+    def convert_json_to_list(cls, value: str) -> list[str]:
+        try:
+            output = json.loads(value)
+            if not isinstance(output, list):
+                raise ValidationError()
+            return output
+        except Exception:
+            raise ValidationError()
+
+
+class GrammarTableCellResponse(BaseResponse):
+    id: int
+
+    row_categories: list[str]
+    column_categories: list[str]
+
+    @field_validator("row_categories", "column_categories", mode="before")
+    @classmethod
+    def convert_json_to_list(cls, value: str) -> list[str]:
+        try:
+            output = json.loads(value)
+            if not isinstance(output, list):
+                raise ValidationError()
+            return output
+        except Exception:
+            raise ValidationError()
+
+
+class GrammarTableResponse(BaseResponse):
+    id: int
+    name: str
+    part_of_speech: str
+    language_id: int
+
+    word_classes: list[WordClassResponse]
+
+    rows: list[GrammarTableCategoryResponse]
+    columns: list[GrammarTableCategoryResponse]
+
+    cells: list[GrammarTableCellResponse]

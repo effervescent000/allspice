@@ -132,3 +132,44 @@ def word_class_factory(
         "part_of_speech": part_of_speech or "verb",
         "language_id": language_id,
     }
+
+
+def grammar_category_factory(id: int = None, *, content: list[str]):
+    return {"id": id, "content": content}
+
+
+def grammar_table_base_factory(
+    id: int = None, *, name: str = None, language_id: int, part_of_speech: str = None
+):
+    return {
+        "id": id,
+        "name": name or "test table",
+        "part_of_speech": part_of_speech or "verb",
+        "language_id": language_id,
+    }
+
+
+def grammar_table_request_factory(
+    id: int = None,
+    *,
+    name: str = None,
+    language_id: int,
+    part_of_speech: str = None,
+    word_class_ids: list[str] = None,
+):
+    return {
+        **grammar_table_base_factory(
+            id=id, name=name, language_id=language_id, part_of_speech=part_of_speech
+        ),
+        "word_class_ids": word_class_ids,
+    }
+
+
+def grammar_cell_factory(
+    id: int = None, *, row_categories: list[str], column_categories: list[str]
+):
+    return {
+        "id": id,
+        "row_categories": row_categories,
+        "column_categories": column_categories,
+    }
