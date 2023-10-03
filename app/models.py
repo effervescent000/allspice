@@ -104,6 +104,21 @@ word_class_to_word = Table(
     ),
 )
 
+word_class_to_grammar_table = Table(
+    "word_class_to_grammar_table",
+    Base.metadata,
+    Column(
+        "word_class_id",
+        ForeignKey("word_class_model.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "grammar_table_id",
+        ForeignKey("grammar_table_model.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+
 
 class WordClass(AuditTimestamps, Base):
     __tablename__ = "word_class_model"
@@ -119,6 +134,9 @@ class WordClass(AuditTimestamps, Base):
     language: Mapped["Language"] = relationship()
     words: Mapped[list["Word"]] = relationship(
         secondary=word_class_to_word, back_populates="word_classes"
+    )
+    grammar_tables: Mapped[list["GrammarTable"]] = relationship(
+        secondary=word_class_to_grammar_table, back_populates="word_classes"
     )
 
 
@@ -197,4 +215,77 @@ class SoundChangeRules(Base):
     language: Mapped["Language"] = relationship(back_populates="sound_change_rules")
 
 
-ORMType = type[Word] | type[WordClass] | type[WordLink] | type[SoundChangeRules]
+class GrammarTable(Base):
+    __tablename__ = "grammar_table_model"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    name: Mapped[str]
+    part_of_speech: Mapped[str]
+    language_id: Mapped[int] = mapped_column(
+        ForeignKey("language_model.id", ondelete="CASCADE")
+    )
+
+    language: Mapped["Language"] = relationship()
+
+    word_classes: Mapped[list["WordClass"]] = relationship(
+        secondary=word_class_to_grammar_table, back_populates="grammar_tables"
+    )
+
+    rows: Mapped[list["GrammarTableRow"]] = relationship(back_populates="grammar_table")
+    columns: Mapped[list["GrammarTableColumn"]] = relationship(
+        back_populates="grammar_table"
+    )
+    cells: Mapped[list["GrammarTableCell"]] = relationship(
+        back_populates="grammar_table"
+    )
+
+
+class GrammarTableRow(Base):
+    __tablename__ = "grammar_table_row_model"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    content: Mapped[str]
+
+    grammar_table_id: Mapped[int] = mapped_column(
+        ForeignKey("grammar_table_model.id", ondelete="CASCADE")
+    )
+    grammar_table: Mapped["GrammarTable"] = relationship(back_populates="rows")
+
+
+class GrammarTableColumn(Base):
+    __tablename__ = "grammar_table_column_model"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    content: Mapped[str]
+
+    grammar_table_id: Mapped[int] = mapped_column(
+        ForeignKey("grammar_table_model.id", ondelete="CASCADE")
+    )
+    grammar_table: Mapped["GrammarTable"] = relationship(back_populates="columns")
+
+
+class GrammarTableCell(Base):
+    __tablename__ = "grammar_table_cell_model"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    row_categories: Mapped[str]
+    column_categories: Mapped[str]
+
+    grammar_table_id: Mapped[int] = mapped_column(
+        ForeignKey("grammar_table_model.id", ondelete="CASCADE")
+    )
+
+    grammar_table: Mapped["GrammarTable"] = relationship(back_populates="cells")
+
+
+ORMType = (
+    type[Word]
+    | type[WordClass]
+    | type[WordLink]
+    | type[SoundChangeRules]
+    | type[GrammarTable]
+    | type[GrammarTableRow]
+    | type[GrammarTableColumn]
+    | type[GrammarTableCell]
+)
