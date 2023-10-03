@@ -113,15 +113,17 @@ class GrammarTableCellResponse(BaseResponse):
             raise ValidationError()
 
 
-class GrammarTableResponse(BaseResponse):
+class GrammarTableMinimalResponse(BaseResponse):
     id: int
     name: str
     part_of_speech: str
     language_id: int
 
-    word_classes: list[WordClassResponse]
 
-    rows: list[GrammarTableCategoryResponse]
-    columns: list[GrammarTableCategoryResponse]
+class GrammarTableFullResponse(GrammarTableMinimalResponse):
+    word_classes: list[WordClassResponse] | None = []
 
-    cells: list[GrammarTableCellResponse]
+    rows: list[GrammarTableCategoryResponse] | None = []
+    columns: list[GrammarTableCategoryResponse] | None = []
+
+    cells: list[GrammarTableCellResponse] | None = []

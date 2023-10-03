@@ -13,6 +13,10 @@ from app.core.session import async_engine, async_session
 from app.main import app
 from app.models import (
     Base,
+    GrammarTable,
+    GrammarTableCell,
+    GrammarTableColumn,
+    GrammarTableRow,
     Language,
     ORMType,
     Phone,
@@ -24,6 +28,9 @@ from app.models import (
 )
 from app.tests.shapes import (
     base_word_factory,
+    grammar_category_factory,
+    grammar_cell_factory,
+    grammar_table_base_factory,
     phone_factory,
     sound_change_rules_factory,
     word_class_factory,
@@ -49,6 +56,7 @@ default_word_class_name = "default word class"
 default_word_class_abbr = "dwc"
 secondary_word_class_name = "secondary word class"
 secondary_word_class_abbr = "swc"
+default_grammar_table_name = "default grammar table"
 
 
 async def get_or_insert_model(
@@ -374,3 +382,44 @@ async def secondary_word_class(
             language_id=default_language.id,
         ),
     )
+
+
+@pytest_asyncio.fixture
+async def default_grammar_table(
+    test_db_setup_sessionmaker,
+    default_language: Language,
+    default_word_class: WordClass,
+) -> GrammarTable:
+    async with async_session() as session:
+        table = (
+            await session.scalars(
+                select(GrammarTable).where(
+                    GrammarTable.name == default_grammar_table_name
+                )
+            )
+        ).first()
+        if table is None:
+            new_table = GrammarTable(
+                **grammar_table_base_factory(
+                    language_id=default_language.id, name=default_grammar_table_name
+                ),
+                word_classes=[default_word_class],
+                rows=[GrammarTableRow(**grammar_category_factory(content='["test"]'))],
+                columns=[
+                    GrammarTableColumn(
+                        **grammar_category_factory(content='["another"]')
+                    )
+                ],
+                cells=[
+                    GrammarTableCell(
+                        **grammar_cell_factory(
+                            row_categories='["test"]', column_categories='["another"]'
+                        )
+                    )
+                ],
+            )
+            session.add(new_table)
+            await session.commit()
+            await session.refresh(new_table)
+            return new_table
+        return table
